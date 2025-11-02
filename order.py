@@ -57,6 +57,3 @@ def run():
     config.accesslog = "-"  # Enable access logging to stdout.
 
     asyncio.run(serve(app, config))
-
-
-run()
