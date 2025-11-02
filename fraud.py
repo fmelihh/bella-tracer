@@ -8,7 +8,7 @@ from faker import Faker
 
 SERVICE_NAME = "fraud-service"
 setup_logging(service_name=SERVICE_NAME)
-log = logging.getLogger(__name__)
+log = logging.getLogger(SERVICE_NAME)
 app = FastAPI()
 app.add_middleware(UnifiedLoggingMiddleware)
 fake = Faker()
