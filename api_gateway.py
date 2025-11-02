@@ -6,7 +6,7 @@ from logging_config import setup_logging, UnifiedLoggingMiddleware, trace_id_var
 
 SERVICE_NAME = "api-gateway"
 setup_logging(service_name=SERVICE_NAME)
-log = logging.getLogger(__name__)
+log = logging.getLogger(SERVICE_NAME)
 app = FastAPI()
 app.add_middleware(UnifiedLoggingMiddleware)
 http_client = httpx.AsyncClient()

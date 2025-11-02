@@ -10,15 +10,13 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 try:
     producer = KafkaProducer(
-        bootstrap_servers="localhost:9092",
+        bootstrap_servers="localhost:29092",
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        linger_ms=10,
-        batch_size=16384,
     )
     KAFKA_TOPIC = "logs"
-    print("[KafkaSetup] Producer bağlantısı başarılı.")
+    print("[KafkaSetup] Producer connection established successfully.")
 except Exception as e:
-    print(f"[KafkaSetup] Producer'a bağlanılamadı: {e}")
+    print(f"[KafkaSetup] Producer not available the error is: {e}")
     producer = None
 
 
@@ -35,7 +33,6 @@ class KafkaLoggingHandler(Handler):
         if not self.producer:
             return
         try:
-            # Formatlayıcıdan gelen 'dict'i al
             log_message = self.format(record)
             self.producer.send(self.topic, value=log_message)
         except Exception:
@@ -66,8 +63,7 @@ class JsonFormatter(logging.Formatter):
 
 
 def setup_logging(service_name: str):
-    logging.getLogger("kafka").setLevel(logging.WARNING)
-    logger = logging.getLogger()
+    logger = logging.getLogger(service_name)
     logger.setLevel(logging.DEBUG)
 
     if logger.hasHandlers():
@@ -80,8 +76,6 @@ def setup_logging(service_name: str):
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(JsonFormatter(service_name=service_name))
     logger.addHandler(console_handler)
-
-    logging.info(f"[{service_name}] Logging Kafka'ya yönlendirildi.")
 
 
 class UnifiedLoggingMiddleware(BaseHTTPMiddleware):
@@ -110,8 +104,9 @@ class UnifiedLoggingMiddleware(BaseHTTPMiddleware):
             elif status_code >= 400:
                 level = logging.WARNING
 
-            level(
-                f"Response {status_code} {request.method} {request.url.path} finished in {duration_ms:.2f}ms"
+            logging.log(
+                level,
+                f"Response {status_code} {request.method} {request.url.path} finished in {duration_ms:.2f}ms",
             )
 
             trace_id_var.reset(token)
