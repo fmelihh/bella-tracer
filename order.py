@@ -13,7 +13,7 @@ setup_logging(service_name=SERVICE_NAME)
 log = logging.getLogger(SERVICE_NAME)
 app = FastAPI()
 app.add_middleware(middleware_class=UnifiedLoggingMiddleware, service_name=SERVICE_NAME)
-http_client = httpx.AsyncClient()
+http_client = httpx.AsyncClient(timeout=900.0)
 
 
 @app.post("/order")
