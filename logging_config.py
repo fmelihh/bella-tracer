@@ -1,7 +1,8 @@
-import logging
 import json
 import uuid
 import time
+import random
+import logging
 from contextvars import ContextVar
 from kafka import KafkaProducer
 from logging import Handler, LogRecord
@@ -11,9 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 try:
     producer = KafkaProducer(
         bootstrap_servers="localhost:29092",
-        value_serializer=lambda v: json.dumps(v).encode("utf-8")
-        if isinstance(v, str)
-        else v.encode("utf-8"),
+        value_serializer=lambda v: v.encode("utf-8"),
     )
     KAFKA_TOPIC = "logs"
     print("[KafkaSetup] Producer connection established successfully.")
@@ -49,6 +48,20 @@ class JsonFormatter(logging.Formatter):
     def format(self, record: LogRecord) -> str:
         trace_id = trace_id_var.get()
 
+        if random.random() < 0.1:
+            cpu_usage = round(random.uniform(85.0, 99.0), 2)
+        else:
+            cpu_usage = round(random.uniform(5.0, 30.0), 2)
+
+        if random.random() < 0.05:
+            mem_usage = round(random.uniform(90.0, 98.0), 2)
+        else:
+            mem_usage = round(random.uniform(20.0, 50.0), 2)
+
+        mock_metrics = {
+            "cpu_percent": cpu_usage,
+            "memory_percent": mem_usage,
+        }
         log_data = {
             "timestamp": self.formatTime(record, self.datefmt),
             "service": self.service_name,
@@ -57,6 +70,7 @@ class JsonFormatter(logging.Formatter):
             "message": record.getMessage(),
             "logger_name": record.name,
             "funcName": record.funcName,
+            "metrics": mock_metrics,
         }
         if record.exc_info:
             log_data["exc_info"] = self.formatException(record.exc_info)
