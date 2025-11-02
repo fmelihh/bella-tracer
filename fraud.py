@@ -39,4 +39,4 @@ async def check_fraud(request: Request):
 
 
 def run():
-    uvicorn.run(app, host="0.0.0.0", port=8003)
+    uvicorn.run("fraud:app", host="0.0.0.0", port=8003, reload=True)

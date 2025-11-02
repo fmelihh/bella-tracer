@@ -49,4 +49,4 @@ async def process_payment(request: Request):
 
 
 def run():
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+    uvicorn.run("payment:app", host="0.0.0.0", port=8002, reload=True)

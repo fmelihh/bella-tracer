@@ -48,4 +48,4 @@ async def create_order_gateway(request: Request):
 
 
 def run():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("api_gateway:app", host="0.0.0.0", port=8000, reload=True)

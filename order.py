@@ -3,7 +3,7 @@ import logging
 import httpx
 import uvicorn
 import random
-from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Request
 from logging_config import setup_logging, UnifiedLoggingMiddleware, trace_id_var
 
 SERVICE_NAME = "order-service"
@@ -49,4 +49,7 @@ async def create_order(request: Request):
 
 
 def run():
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run("order:app", host="0.0.0.0", port=8001, reload=True)
+
+
+run()

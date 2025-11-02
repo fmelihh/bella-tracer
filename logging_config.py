@@ -50,11 +50,13 @@ class JsonFormatter(logging.Formatter):
 
         if random.random() < 0.1:
             cpu_usage = round(random.uniform(85.0, 99.0), 2)
+            time.sleep(random.randint(4, 15))
         else:
             cpu_usage = round(random.uniform(5.0, 30.0), 2)
 
         if random.random() < 0.05:
             mem_usage = round(random.uniform(90.0, 98.0), 2)
+            time.sleep(random.randint(4, 15))
         else:
             mem_usage = round(random.uniform(20.0, 50.0), 2)
 
