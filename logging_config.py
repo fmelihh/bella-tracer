@@ -5,7 +5,7 @@ import time
 from contextvars import ContextVar
 from kafka import KafkaProducer
 from logging import Handler, LogRecord
-from fastapi import Request
+from fastapi import Request, FastAPI
 from starlette.middleware.base import BaseHTTPMiddleware
 
 try:
@@ -82,9 +82,9 @@ def setup_logging(service_name: str):
 
 
 class UnifiedLoggingMiddleware(BaseHTTPMiddleware):
-    def __init__(self, service_name: str, *args, **kwargs):
+    def __init__(self, app: FastAPI, service_name: str, *args, **kwargs):
         self.service_name = service_name
-        super().__init__(self, *args, **kwargs)
+        BaseHTTPMiddleware.__init__(self, app, *args, **kwargs)
 
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
