@@ -1,7 +1,9 @@
 import asyncio
 import logging
 import httpx
-import uvicorn
+from hypercorn.asyncio import serve
+from hypercorn.config import Config
+
 import random
 from fastapi import FastAPI, HTTPException, Request
 from logging_config import setup_logging, UnifiedLoggingMiddleware, trace_id_var
@@ -49,7 +51,12 @@ async def create_order(request: Request):
 
 
 def run():
-    uvicorn.run("order:app", host="0.0.0.0", port=8001, reload=True)
+    config = Config()
+    config.bind = [f"0.0.0.0:8001"]
+    config.workers = 1
+    config.accesslog = "-"  # Enable access logging to stdout.
+
+    asyncio.run(serve(app, config))
 
 
 run()

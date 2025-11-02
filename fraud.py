@@ -1,5 +1,6 @@
 import logging
-import uvicorn
+from hypercorn.asyncio import serve
+from hypercorn.config import Config
 import random
 import asyncio
 from fastapi import FastAPI, Request
@@ -39,4 +40,9 @@ async def check_fraud(request: Request):
 
 
 def run():
-    uvicorn.run("fraud:app", host="0.0.0.0", port=8003, reload=True)
+    config = Config()
+    config.bind = [f"0.0.0.0:8003"]
+    config.workers = 1
+    config.accesslog = "-"  # Enable access logging to stdout.
+
+    asyncio.run(serve(app, config))
