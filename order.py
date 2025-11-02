@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import httpx
 import uvicorn
@@ -9,7 +10,7 @@ SERVICE_NAME = "order-service"
 setup_logging(service_name=SERVICE_NAME)
 log = logging.getLogger(SERVICE_NAME)
 app = FastAPI()
-app.add_middleware(UnifiedLoggingMiddleware)
+app.add_middleware(middleware_class=UnifiedLoggingMiddleware, service_name=SERVICE_NAME)
 http_client = httpx.AsyncClient()
 
 
@@ -26,6 +27,8 @@ async def create_order(request: Request):
 
     trace_id = trace_id_var.get()
     headers = {"X-Trace-ID": trace_id}
+
+    await asyncio.sleep(random.randint(0, 15))
 
     try:
         log.debug("Calling payment-service...")

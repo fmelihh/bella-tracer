@@ -11,7 +11,9 @@ from starlette.middleware.base import BaseHTTPMiddleware
 try:
     producer = KafkaProducer(
         bootstrap_servers="localhost:29092",
-        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+        value_serializer=lambda v: json.dumps(v).encode("utf-8")
+        if isinstance(v, str)
+        else v.encode("utf-8"),
     )
     KAFKA_TOPIC = "logs"
     print("[KafkaSetup] Producer connection established successfully.")
@@ -44,7 +46,7 @@ class JsonFormatter(logging.Formatter):
         super().__init__(*args, **kwargs)
         self.service_name = service_name
 
-    def format(self, record: LogRecord) -> dict:
+    def format(self, record: LogRecord) -> str:
         trace_id = trace_id_var.get()
 
         log_data = {
@@ -59,6 +61,7 @@ class JsonFormatter(logging.Formatter):
         if record.exc_info:
             log_data["exc_info"] = self.formatException(record.exc_info)
 
+        log_data = json.dumps(log_data, indent=4, ensure_ascii=False)
         return log_data
 
 
@@ -79,13 +82,18 @@ def setup_logging(service_name: str):
 
 
 class UnifiedLoggingMiddleware(BaseHTTPMiddleware):
+    def __init__(self, service_name: str, *args, **kwargs):
+        self.service_name = service_name
+        super().__init__(self, *args, **kwargs)
+
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
         trace_id = request.headers.get("X-Trace-ID") or str(uuid.uuid4())
 
         token = trace_id_var.set(trace_id)
 
-        logging.info(f"Request {request.method} {request.url.path} started")
+        logger = logging.getLogger(self.service_name)
+        logger.info(f"Request {request.method} {request.url.path} started")
 
         status_code = None
         try:
@@ -93,7 +101,7 @@ class UnifiedLoggingMiddleware(BaseHTTPMiddleware):
             status_code = response.status_code
         except Exception:
             status_code = 500
-            logging.error("Unhandled exception", exc_info=True)
+            logger.error("Unhandled exception", exc_info=True)
             raise
         finally:
             duration_ms = (time.time() - start_time) * 1000
@@ -104,7 +112,7 @@ class UnifiedLoggingMiddleware(BaseHTTPMiddleware):
             elif status_code >= 400:
                 level = logging.WARNING
 
-            logging.log(
+            logger.log(
                 level,
                 f"Response {status_code} {request.method} {request.url.path} finished in {duration_ms:.2f}ms",
             )

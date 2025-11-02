@@ -10,7 +10,7 @@ SERVICE_NAME = "fraud-service"
 setup_logging(service_name=SERVICE_NAME)
 log = logging.getLogger(SERVICE_NAME)
 app = FastAPI()
-app.add_middleware(UnifiedLoggingMiddleware)
+app.add_middleware(middleware_class=UnifiedLoggingMiddleware, service_name=SERVICE_NAME)
 fake = Faker()
 
 
@@ -20,12 +20,12 @@ async def check_fraud(request: Request):
     order_id = data.get("order_id")
     user_email = fake.email()  # Sahte bir email
 
-    await asyncio.sleep(random.uniform(0.05, 0.5))
+    await asyncio.sleep(random.uniform(1, 15))
     risk_score = random.uniform(0.1, 100.0)
 
     decision = "LOW_RISK"
     log_level = log.info
-    if risk_score > 90:
+    if risk_score > 30:
         decision = "HIGH_RISK"
         log_level = log.warning
 

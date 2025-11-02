@@ -8,7 +8,7 @@ SERVICE_NAME = "api-gateway"
 setup_logging(service_name=SERVICE_NAME)
 log = logging.getLogger(SERVICE_NAME)
 app = FastAPI()
-app.add_middleware(UnifiedLoggingMiddleware)
+app.add_middleware(middleware_class=UnifiedLoggingMiddleware, service_name=SERVICE_NAME)
 http_client = httpx.AsyncClient()
 
 
