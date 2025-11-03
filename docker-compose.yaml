@@ -65,5 +65,17 @@ services:
     environment:
       - PREFECT_LOGGING_LEVEL=DEBUG
 
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    environment:
+      - NEO4J_AUTH=neo4j/bella_tracer_test_123
+
 volumes:
   prefect_data:
+  neo4j_data:
