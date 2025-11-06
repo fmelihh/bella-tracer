@@ -6,7 +6,11 @@ from hypercorn.config import Config
 
 import random
 from fastapi import FastAPI, HTTPException, Request
-from logging_config import setup_logging, UnifiedLoggingMiddleware, trace_id_var
+from bella_tracer.tracer.services.logging_config import (
+    setup_logging,
+    UnifiedLoggingMiddleware,
+    trace_id_var,
+)
 
 SERVICE_NAME = "order-service"
 setup_logging(service_name=SERVICE_NAME)
@@ -49,7 +53,7 @@ async def create_order(request: Request):
 
 def run():
     config = Config()
-    config.bind = [f"0.0.0.0:8001"]
+    config.bind = ["0.0.0.0:8001"]
     config.workers = 1
     config.accesslog = "-"  # Enable access logging to stdout.
 

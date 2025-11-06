@@ -1,7 +1,8 @@
 import os
 import hashlib
 from typing import Any
-from tracer import interfaces
+
+from bella_tracer.tracer import interfaces
 
 
 async def ensure_neo4j_indexes():

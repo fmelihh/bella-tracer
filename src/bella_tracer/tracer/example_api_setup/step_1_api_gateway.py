@@ -4,7 +4,11 @@ import asyncio
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
 from fastapi import FastAPI, HTTPException, Request
-from logging_config import setup_logging, UnifiedLoggingMiddleware, trace_id_var
+from bella_tracer.tracer.services.logging_config import (
+    setup_logging,
+    UnifiedLoggingMiddleware,
+    trace_id_var,
+)
 
 SERVICE_NAME = "api-gateway"
 setup_logging(service_name=SERVICE_NAME)
@@ -48,7 +52,7 @@ async def create_order_gateway(request: Request):
 
 def run():
     config = Config()
-    config.bind = [f"0.0.0.0:8000"]
+    config.bind = ["0.0.0.0:8000"]
     config.workers = 1
     config.accesslog = "-"  # Enable access logging to stdout.
 

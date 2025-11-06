@@ -4,7 +4,10 @@ from hypercorn.config import Config
 import random
 import asyncio
 from fastapi import FastAPI, Request
-from logging_config import setup_logging, UnifiedLoggingMiddleware
+from bella_tracer.tracer.services.logging_config import (
+    setup_logging,
+    UnifiedLoggingMiddleware,
+)
 from faker import Faker
 
 SERVICE_NAME = "fraud-service"
@@ -41,7 +44,7 @@ async def check_fraud(request: Request):
 
 def run():
     config = Config()
-    config.bind = [f"0.0.0.0:8003"]
+    config.bind = ["0.0.0.0:8003"]
     config.workers = 1
     config.accesslog = "-"  # Enable access logging to stdout.
 

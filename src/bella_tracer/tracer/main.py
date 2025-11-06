@@ -1,11 +1,8 @@
 import click
 import asyncio
 from datetime import timedelta
-from api_gateway import run as api_gateway_run
-from order import run as order_run
-from payment import run as payment_run
-from fraud import run as fraud_run
 
+from bella_tracer import tracer
 
 from dotenv import load_dotenv
 
@@ -24,37 +21,35 @@ def cli():
 def api_gateway():
     """Runs the API Gateway service."""
     click.echo("Starting API Gateway...")
-    api_gateway_run()
+    tracer.example_api_setup.step_1_api_gateway.run()
 
 
 @cli.command()
 def order():
     """Runs the Order service."""
     click.echo("Starting Order service...")
-    order_run()
+    tracer.example_api_setup.step_2_order.run()
 
 
 @cli.command()
 def payment():
     """Runs the Payment service."""
     click.echo("Starting Payment service...")
-    payment_run()
+    tracer.example_api_setup.step_3_payment.run()
 
 
 @cli.command()
 def fraud():
     """Runs the Fraud service."""
     click.echo("Starting Fraud service...")
-    fraud_run()
+    tracer.example_api_setup.step_4_fraud.run()
 
 
 @cli.command()
 def run_prefect_flows():
     """Runs the Prefect Flows service."""
-    from tracer import workflows
-
     click.echo("Starting Prefect Flows service...")
-    workflows.knowledge_graph_parser.serve(
+    tracer.workflows.knowledge_graph_parser.serve(
         schedule=IntervalSchedule(interval=timedelta(minutes=2)),
     )
 
@@ -63,9 +58,7 @@ def run_prefect_flows():
 def run_neo4j_migrations():
     """Runs the Neo4J Migration service."""
 
-    from tracer import services
-
-    asyncio.run(services.knowledge_graph.ensure_neo4j_indexes())
+    asyncio.run(tracer.services.knowledge_graph.ensure_neo4j_indexes())
 
 
 if __name__ == "__main__":

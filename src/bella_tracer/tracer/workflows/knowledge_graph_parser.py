@@ -1,11 +1,10 @@
 import json
-import asyncio
 from typing import Any
 
 from prefect import flow
 from dotenv import load_dotenv
 
-from tracer import prompts, interfaces, services
+from bella_tracer.tracer import prompts, interfaces, services
 
 load_dotenv()
 
