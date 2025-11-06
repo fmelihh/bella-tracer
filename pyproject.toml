@@ -25,6 +25,7 @@ payment = "bella_tracer.tracer.main:payment"
 fraud = "bella_tracer.tracer.main:fraud"
 prefect_flows = "bella_tracer.tracer.main:run_prefect_flows"
 neo4j_migration = "bella_tracer.tracer.main:run_neo4j_migrations"
+bella_tracer = "bella_tracer.tracer.main:run_bella_tracer"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

@@ -1,5 +1,5 @@
-import click
 import asyncio
+from hypercorn.asyncio import Config, serve
 from datetime import timedelta
 
 from bella_tracer import tracer
@@ -8,61 +8,55 @@ from dotenv import load_dotenv
 
 from prefect.client.schemas.schedules import IntervalSchedule
 
-from bella_tracer.tracer.api import *  # noqa
+from bella_tracer.tracer.api import app
 
 
 load_dotenv()
 
 
-@click.group()
-def cli():
-    """A CLI to run the Bella Tracer interfaces."""
-    pass
-
-
-@cli.command()
 def api_gateway():
     """Runs the API Gateway service."""
-    click.echo("Starting API Gateway...")
+    print("Starting API Gateway...")
     tracer.example_api_setup.step_1_api_gateway.run()
 
 
-@cli.command()
 def order():
     """Runs the Order service."""
-    click.echo("Starting Order service...")
+    print("Starting Order service...")
     tracer.example_api_setup.step_2_order.run()
 
 
-@cli.command()
 def payment():
     """Runs the Payment service."""
-    click.echo("Starting Payment service...")
+    print("Starting Payment service...")
     tracer.example_api_setup.step_3_payment.run()
 
 
-@cli.command()
 def fraud():
     """Runs the Fraud service."""
-    click.echo("Starting Fraud service...")
+    print("Starting Fraud service...")
     tracer.example_api_setup.step_4_fraud.run()
 
 
-@cli.command()
 def run_prefect_flows():
     """Runs the Prefect Flows service."""
-    click.echo("Starting Prefect Flows service...")
+    print("Starting Prefect Flows service...")
     tracer.workflows.knowledge_graph_parser.serve(
         schedule=IntervalSchedule(interval=timedelta(minutes=2)),
     )
 
 
-@cli.command()
 def run_neo4j_migrations():
     """Runs the Neo4J Migration service."""
 
     asyncio.run(tracer.services.knowledge_graph.ensure_neo4j_indexes())
 
 
-if __name__ == "__main__":
-    cli()
+def run_bella_tracer():
+    """Runs the Bella Tracer service."""
+    config = Config()
+    config.bind = ["0.0.0.0:8004"]
+    config.workers = 1
+    config.accesslog = "-"
+
+    asyncio.run(serve(app, config))
