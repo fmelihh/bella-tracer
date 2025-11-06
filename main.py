@@ -5,7 +5,6 @@ from order import run as order_run
 from payment import run as payment_run
 from fraud import run as fraud_run
 
-from src.bella_tracer import workflows
 
 from dotenv import load_dotenv
 
@@ -51,6 +50,8 @@ def fraud():
 @cli.command()
 def run_prefect_flows():
     """Runs the Prefect Flows service."""
+    from tracer import workflows
+
     click.echo("Starting Prefect Flows service...")
     workflows.knowledge_graph_parser.serve(
         schedule=IntervalSchedule(interval=timedelta(minutes=2)),

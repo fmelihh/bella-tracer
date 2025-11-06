@@ -16,9 +16,6 @@ http_client = httpx.AsyncClient(timeout=900.0)
 
 @app.post("/order")
 async def create_order_gateway(request: Request):
-    auth_header = request.headers.get("Authorization")
-    log.debug(f"Authorization Header received: {auth_header}")
-
     trace_id = trace_id_var.get()
     headers = {"X-Trace-ID": trace_id}
 
