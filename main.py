@@ -1,4 +1,5 @@
 import click
+import asyncio
 from datetime import timedelta
 from api_gateway import run as api_gateway_run
 from order import run as order_run
@@ -15,7 +16,7 @@ load_dotenv()
 
 @click.group()
 def cli():
-    """A CLI to run the Bella Tracer services."""
+    """A CLI to run the Bella Tracer interfaces."""
     pass
 
 
@@ -56,6 +57,15 @@ def run_prefect_flows():
     workflows.knowledge_graph_parser.serve(
         schedule=IntervalSchedule(interval=timedelta(minutes=2)),
     )
+
+
+@cli.command()
+def run_neo4j_migrations():
+    """Runs the Neo4J Migration service."""
+
+    from tracer import services
+
+    asyncio.run(services.knowledge_graph.ensure_neo4j_indexes())
 
 
 if __name__ == "__main__":
