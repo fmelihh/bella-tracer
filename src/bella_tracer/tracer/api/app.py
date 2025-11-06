@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(
-    report,
+    report.report_router,
     prefix="/report",
     tags=["report"],
 )
