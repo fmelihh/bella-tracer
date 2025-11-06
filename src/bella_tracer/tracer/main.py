@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 
 from prefect.client.schemas.schedules import IntervalSchedule
 
+from bella_tracer.tracer.api import *  # noqa
+
+
 load_dotenv()
 
 
