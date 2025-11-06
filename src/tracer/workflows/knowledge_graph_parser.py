@@ -86,8 +86,6 @@ async def knowledge_graph_parser():
             try:
                 print(
                     f"[KafkaConsumer] Processing log {cnt}",
-                    end="\r",
-                    flush=True,
                 )
                 log_data = json.loads(msg.value.decode("utf-8"))
                 raw_message = log_data.get("message", "")
