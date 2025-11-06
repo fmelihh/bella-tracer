@@ -73,14 +73,6 @@ def compose_rag_text(log_json: dict[str, Any], analysis: dict[str, Any]) -> str:
     return text
 
 
-async def embed_text(text: str) -> list[float]:
-    openai_client = await interfaces.openai.retrieve_openai_client()
-
-    vector_model = os.getenv("VECTOR_MODEL", "text-embedding-3-small")
-    resp = await openai_client.embeddings.create(model=vector_model, input=text)
-    return resp.data[0].embedding
-
-
 def upsert_log_embedding_with_service(
     session,
     log_json: dict[str, Any],
@@ -155,7 +147,7 @@ def upsert_log_embedding(
 ):
     vector_model = os.getenv("VECTOR_MODEL", "text-embedding-3-small")
 
-    rec = session.run(
+    session.run(
         """
     MATCH (l:Log {timestamp:$timestamp, funcName:$funcName})
     WHERE l.message = $message
@@ -173,4 +165,3 @@ def upsert_log_embedding(
         vector_model=vector_model,
         rag_text=rag_text,
     ).single()
-    _ = rec["lid"] if rec else None

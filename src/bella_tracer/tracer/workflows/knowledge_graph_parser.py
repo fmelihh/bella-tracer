@@ -56,7 +56,7 @@ async def write_embedding_for_log(log_data: dict[str, Any], analysis: dict[str, 
     if not rag_text:
         return
 
-    embedding = await services.knowledge_graph.embed_text(rag_text)
+    embedding = await services.rag.embed_text(rag_text)
     log_id = services.knowledge_graph.make_log_id(log_data)
 
     neo4j_driver = await interfaces.neo4j.retrieve_neo4j_driver()
