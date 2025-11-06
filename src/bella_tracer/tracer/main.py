@@ -60,3 +60,7 @@ def run_bella_tracer():
     config.accesslog = "-"
 
     asyncio.run(serve(app, config))
+
+
+if __name__ == "__main__":
+    run_bella_tracer()

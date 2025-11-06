@@ -135,7 +135,7 @@ async def retrieve_rag_result(question: str):
     hits = await knn_logs(q_emb, k=10)
 
     traces = {h["trace_id"] for h in hits if h.get("trace_id")}
-    timelines = {t_id: trace_timeline(trace_id=t_id) async for t_id in list(traces)[:3]}
+    timelines = {t_id: await trace_timeline(trace_id=t_id) for t_id in list(traces)[:3]}
 
     summary = await summarize(question=question, hits=hits, timelines=timelines)
 
