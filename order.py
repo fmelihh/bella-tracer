@@ -19,13 +19,10 @@ http_client = httpx.AsyncClient(timeout=900.0)
 @app.post("/order")
 async def create_order(request: Request):
     data = await request.json()
-    user_id = data.get("user_id", "unknown_user")
     item_count = data.get("item_count", 0)
     order_id = f"ORD-{random.randint(1000, 9999)}"
 
-    log.info(
-        f"New order {order_id} created for user {user_id} with {item_count} items."
-    )
+    log.info(f"New order {order_id} created with {item_count} items.")
 
     trace_id = trace_id_var.get()
     headers = {"X-Trace-ID": trace_id}

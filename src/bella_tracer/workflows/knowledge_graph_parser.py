@@ -8,6 +8,10 @@ from typing import Dict, Any
 
 from bella_tracer import prompts
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
@@ -18,7 +22,7 @@ KAFKA_TOPIC = "logs"
 openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 
-@task(name="Analyze Log (Detective)")
+# @task(name="Analyze Log (Detective)")
 async def analyze_log_message(raw_message: str) -> Dict[str, Any]:
     if not raw_message:
         return {}
@@ -33,7 +37,7 @@ async def analyze_log_message(raw_message: str) -> Dict[str, Any]:
     return json.loads(analysis_content)
 
 
-@task(name="Build Cypher (Architect)")
+# @task(name="Build Cypher (Architect)")
 async def build_cypher_queries(original_log: Dict, analysis: Dict) -> str:
     prompt = prompts.ARCHITECT_PROMPT_TEMPLATE.format(
         original_log_json=json.dumps(original_log),
@@ -47,26 +51,22 @@ async def build_cypher_queries(original_log: Dict, analysis: Dict) -> str:
     return cypher_queries
 
 
-@task(name="Write to Neo4j")
+# @task(name="Write to Neo4j")
 async def execute_cypher_queries(cypher_query: str):
     if not cypher_query:
         return
 
-    async with GraphDatabase.driver(
-        NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)
-    ) as driver:
-        async with driver.session(database="neo4j") as session:
+    with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)) as driver:
+        with driver.session(database="neo4j") as session:
             queries = [q.strip() for q in cypher_query.split(";") if q.strip()]
 
-            async with session.begin_transaction() as tx:
+            with session.begin_transaction() as tx:
                 for i, query in enumerate(queries):
                     try:
-                        await tx.run(query)
+                        tx.run(query)
                     except Exception as e:
-                        print(
-                            f"[Neo4j] Hata (Sorgu {i + 1}/{len(queries)}): {query}\n{e}"
-                        )
-                        await tx.rollback()
+                        print(e)
+                        tx.rollback()
                         return
 
 
@@ -97,6 +97,13 @@ async def knowledge_graph_parser():
                 )
                 await execute_cypher_queries(cypher_query=cypher_queries)
             except Exception as e:
+                print(e)
                 raise e
     finally:
         await consumer.stop()
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    asyncio.run(knowledge_graph_parser.fn())
