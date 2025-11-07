@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-from prefect import flow
+from prefect import flow, task
 from dotenv import load_dotenv
 
 from bella_tracer.tracer import prompts, interfaces, services
@@ -9,6 +9,7 @@ from bella_tracer.tracer import prompts, interfaces, services
 load_dotenv()
 
 
+@task(name="analyze-log-message")
 async def analyze_log_message(raw_message: str) -> dict[str, Any]:
     if not raw_message:
         return {}
@@ -24,6 +25,7 @@ async def analyze_log_message(raw_message: str) -> dict[str, Any]:
     return json.loads(analysis_content)
 
 
+@task(name="build-cypher-queries")
 async def build_cypher_queries(log_input_json: dict, analysis: dict) -> str:
     prompt = prompts.ARCHITECT_PROMPT_TEMPLATE.format(
         log_input_json=json.dumps(log_input_json),
@@ -42,6 +44,7 @@ async def build_cypher_queries(log_input_json: dict, analysis: dict) -> str:
     return cypher_queries
 
 
+@task(name="execute-cypher-queries")
 async def execute_cypher_queries(cypher_query: str):
     if not cypher_query:
         return
@@ -51,8 +54,11 @@ async def execute_cypher_queries(cypher_query: str):
         session.run(cypher_query)
 
 
+@task(name="write-embedding-for-log")
 async def write_embedding_for_log(log_data: dict[str, Any], analysis: dict[str, Any]):
-    rag_text = services.knowledge_graph.compose_rag_text(log_data, analysis)
+    rag_text = services.knowledge_graph.compose_rag_text(
+        log_json=log_data, analysis=analysis
+    )
     if not rag_text:
         return
 
@@ -101,7 +107,9 @@ async def knowledge_graph_parser():
                 )
                 await execute_cypher_queries(cypher_query=cypher_queries)
 
-                await write_embedding_for_log(log_data, analysis_result)
+                await write_embedding_for_log(
+                    log_data=log_data, analysis=analysis_result
+                )
 
                 cnt += 1
             except Exception as e:
@@ -109,9 +117,3 @@ async def knowledge_graph_parser():
                 continue
     finally:
         await consumer.stop()
-
-
-if __name__ == "__main__":
-    import asyncio
-
-    asyncio.run(knowledge_graph_parser.fn())
